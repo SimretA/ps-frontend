@@ -8,25 +8,19 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import { LinearProgress } from '@material-ui/core';
+import { Typography } from '@mui/material';
 
 export default function TabelView(props) {
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
-  };
+  
+  const [locked, setLocked] = React.useState(false);
 
   return (
-    <Paper sx={{ width: '100%', height:"40vh", paddingBottom:"20px", overflow:"hidden", marginBottom:"5px" }}>
+    <Paper sx={{ width: '100%',  paddingBottom:"20px", overflow:"hidden", marginBottom:"5px" }}>
         {props.loading && <LinearProgress width={'100%'}/>}
         <>
-            <TableContainer sx={{ maxHeight: 440 }}>
+            <TableContainer  >
+
                 <Table stickyHeader aria-label="sticky table">
                 <TableHead>
                     <TableRow>
@@ -48,16 +42,39 @@ export default function TabelView(props) {
                     .map((row) => {
                         return (
                         <TableRow hover role="checkbox" tabIndex={-1} key={row.code} 
+
+                        sx={{...props.hovering==row['pattern'] &&{backgroundColor:"#f5f5f5"}}}
+
                         onMouseEnter={()=>{
-                            if(props.setHovering){
+                            if(!locked && props.setHovering){
                                 props.setHovering(row['pattern'])
                             }
                         }}
                         onMouseLeave={()=>{
-                            if(props.setHovering){
+                            if(!locked && props.setHovering){
                                 props.setHovering(null)
+                                // console.log("Mouse leaving ", row['pattern'])
                             }
-                            console.log(row['pattern'])
+                            
+                        }}
+
+                        onClick={()=>{
+                            // console.log("selected pattern ", props.hovering)
+                            if(!locked  && props.setHovering){
+                                props.setHovering(row['pattern'])
+                                setLocked(true)
+
+                            }
+                            else if (locked && props.setHovering){
+                                if(props.hovering==row['pattern']){
+                                    setLocked(false)
+                                    props.setHovering(null)
+
+                                }else{
+                                    props.setHovering(row['pattern'])
+                                }
+                            }
+
                         }}
                         >
                             {props.columns.map((column) => {
@@ -76,15 +93,6 @@ export default function TabelView(props) {
                 </TableBody>
                 </Table>
             </TableContainer>
-            <TablePagination
-                rowsPerPageOptions={[10, 25, 100]}
-                component="div"
-                count={props.data?props.data.length:0}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-            />
       </>
     </Paper>
   );
