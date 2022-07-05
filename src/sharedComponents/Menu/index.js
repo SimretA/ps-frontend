@@ -13,6 +13,7 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
+import { Typography } from '@material-ui/core';
 
 export default function Settings(props) {
 
@@ -43,55 +44,6 @@ export default function Settings(props) {
         setAnchorEl(null);
     };
 
-    // return (
-    //     <div>
-    //     <List
-    //         component="nav"
-    //         aria-label="Device settings"
-    //         sx={{ bgcolor: 'background.paper' }}
-    //     >
-    //         <ListItem
-    //         button
-    //         id="lock-button"
-    //         aria-haspopup="listbox"
-    //         aria-controls="lock-menu"
-    //         aria-label="Preference"
-    //         aria-expanded={open ? 'true' : undefined}
-    //         onClick={handleClickListItem}
-    //         >
-    //             <ListItemIcon>
-    //                 <AutoFixHighIcon/>
-    //             </ListItemIcon>
-    //         <ListItemText
-    //             primary="Preference"
-    //             secondary={options[workspace.selectedSetting]}
-    //         />
-                
-    //         </ListItem>
-    //     </List>
-    //     <Menu
-    //         id="lock-menu"
-    //         anchorEl={anchorEl}
-    //         open={open}
-    //         onClose={handleClose}
-    //         MenuListProps={{
-    //         'aria-labelledby': 'lock-button',
-    //         role: 'listbox',
-    //         }}
-    //     >
-    //         {Object.keys(options).map((key) => (
-    //         <MenuItem
-    //             key={options[key]}
-    //             selected={key === workspace.selectedSetting}
-    //             onClick={(event) => handleMenuItemClick(event, key)}
-    //         >
-    //             {options[key]}
-    //         </MenuItem>
-    //         ))}
-    //     </Menu>
-    //     </div>
-    // );
-
 
     return (
         <FormControl>
@@ -102,9 +54,16 @@ export default function Settings(props) {
         name="row-radio-buttons-group"
         value = {workspace.selectedSetting}
         onChange={(event) => handleMenuItemClick(event, event.target.value)}
+
+        sx={{height:"10vh"}}
       >
 
-    {Object.keys(options).map((key) => <FormControlLabel value={key} control={<Radio />} label={options[key]} />)}
+    {Object.keys(options).map((key) => <FormControlLabel value={key} control={<Radio />} 
+    label={<Typography 
+      sx={{fontSize: 14,
+      fontWeight:100,}} 
+      
+      color="text.secondary"> {options[key]} </Typography>}/> )}
         
         
       </RadioGroup>

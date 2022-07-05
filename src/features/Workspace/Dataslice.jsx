@@ -1,11 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-const base_url = 'http://35.232.59.136:8080'
+const base_url = 'http://34.135.64.207:8080'
 
 const settingsEnum = Object.freeze({
     0: "Do not Reorder",
-    1: "Show me positives on top",
-    2: "Show me negatives on top",
-    3: "Show me unlabeled on top",
+    1: "Positives on top",
+    2: "Negatives on top",
+    3: "Unlabeled on top",
   });
 const initialState = {
     workspace: "fairytale-bias-val-split",
@@ -16,14 +16,21 @@ const initialState = {
     combinedRules: null,
     curCategory: null,
     scores: null,
-    theme: 'price',
     patterns:[],
     combinedPatterns: {},
     explanation:{},
     loadingCombinedPatterns: false,
     loadingPatterns:false,
     orderSetting:settingsEnum,
-    selectedSetting:0
+    selectedSetting:0,
+    annotationPerRetrain:5,
+    userAnnotationCount:0,
+    modelAnnotationCount:0,
+    totalDataset:0,
+    selectedPatterns:{},
+    themes:[],
+    relatedExamples:[],
+    selectedTheme:null
 }
 
 const reorderDataset = (dataset, setting)=>{
@@ -104,9 +111,38 @@ export const fetchDataset = createAsyncThunk('workspace/dataset', async (request
     return data
 })
 
+export const fetchThemes = createAsyncThunk('workspace/themes', async (request, { getState }) => {
+    var url = new URL(`${base_url}/themes`)
+
+    const data = await fetch(url, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        },
+        method: "GET"
+    }).then( response => response.json())
+
+    return data
+})
+
+export const fetchSelectedTheme = createAsyncThunk('workspace/selected_theme', async (request, { getState }) => {
+    var url = new URL(`${base_url}/selected_theme`)
+
+    const data = await fetch(url, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        },
+        method: "GET"
+    }).then( response => response.json())
+
+    return data
+})
+
 export const labelData = createAsyncThunk('workspace/labelData', async (request, { getState }) => {
     
     const { element_id, label } = request
+
     
     var url = new URL(`${base_url}/label/${element_id}/${label}`)
 
@@ -121,38 +157,57 @@ export const labelData = createAsyncThunk('workspace/labelData', async (request,
     return data
 })
 
-
-export const batchLabelData = createAsyncThunk('workspace/batchLabelData', async (request, { getState }) => {
-
-    for (const [key, value] of Object.entries(request)) {
-        // var url = new URL(`${base_url}/label/${element_id}/${label}`)
-
-
-    // const data = await fetch(url, {
-    //     headers: {
-    //         'Content-Type': 'application/json'
-    //     },
-    //     method: "POST"
-    // }).then( response => response.json())
-
-    // return data
-      }
-      
+export const setTheme = createAsyncThunk('workspace/setTheme', async (request, { getState }) => {
     
-    console.log(request)
-    return null
+    const { theme } = request
+
     
-    // var url = new URL(`${base_url}/label/${element_id}/${label}`)
+    var url = new URL(`${base_url}/set_theme/${theme}`)
 
 
-    // const data = await fetch(url, {
-    //     headers: {
-    //         'Content-Type': 'application/json'
-    //     },
-    //     method: "POST"
-    // }).then( response => response.json())
+    const data = await fetch(url, {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: "POST"
+    }).then( response => response.json())
 
-    // return data
+    return data
+})
+
+export const labelPhrase = createAsyncThunk('workspace/phrase', async (request, { getState }) => {
+    
+    const { phrase, label } = request
+
+    
+    var url = new URL(`${base_url}/phrase/${phrase}/${label}`)
+
+
+    const data = await fetch(url, {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: "POST"
+    }).then( response => response.json())
+
+    return data
+})
+
+export const fetchRelatedExample = createAsyncThunk('workspace/related_examples', async (request, { getState }) => {
+    const state = getState()
+
+    const { id } = request
+
+    var url = new URL(`${base_url}/related_examples/${id}`)
+
+    const data = await fetch(url, {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: "GET"
+    }).then( response => response.json())
+
+    return data
 })
 
 
@@ -208,17 +263,62 @@ const DataSlice = createSlice({
             return {
                 ...state,
                 dataset: data,
-                ready: true
+                ready: true,
+                totalDataset: data.length
+            }
+        },
+
+        [fetchThemes.fulfilled]: (state, action) => {
+            const data = action.payload
+
+            return {
+                ...state,
+                themes: data,
+            }
+        },
+
+
+        [fetchSelectedTheme.fulfilled]: (state, action) => {
+            const data = action.payload
+            console.log("selected theme", data)
+
+            return {
+                ...state,
+                selectedTheme: data,
+            }
+        },
+
+
+        [setTheme.fulfilled]: (state, action) => {
+            const data = action.payload
+            console.log("selected theme", data)
+
+            return {
+                ...state,
+                dataset: data[1],
+                selectedTheme:data[0],
+                explanation:{},
+                combinedPatterns: {},
+                patterns:[],
+                userAnnotationCount:0,
+                modelAnnotationCount:0,
+
             }
         },
         
+        
         [labelData.fulfilled]:(state, action)=>{
             let dataset = JSON.parse(JSON.stringify(state.dataset))
+            let userAnnotationCount = JSON.parse(JSON.stringify(state.userAnnotationCount))
             console.log(dataset)
             const data = action.payload
             const index = dataset.findIndex((element)=>element.id==data.id)
 
             if(index!=-1){
+                if(!dataset[index].user_label){
+                    userAnnotationCount += 1
+                }
+                
                 dataset[index] = {...dataset[index], user_label:data.label}
 
             }
@@ -226,7 +326,19 @@ const DataSlice = createSlice({
             
             return{
                 ...state,
-                dataset:dataset
+                dataset:dataset,
+                userAnnotationCount:userAnnotationCount
+            }
+
+        },
+
+        [labelPhrase.fulfilled]:(state, action)=>{
+            
+            const data = action.payload
+            console.log(data)
+            
+            return{
+                ...state,
             }
 
         },
@@ -238,9 +350,15 @@ const DataSlice = createSlice({
                 loadingPatterns: true
             }
         },
+
         [fetchPatterns.fulfilled]:(state, action)=>{
             const data = action.payload
-            // console.log(data)
+            console.log(data)
+            if(data.message){
+                return{
+                    ...state,
+                }
+            }
 
             return{
                 ...state,
@@ -250,7 +368,16 @@ const DataSlice = createSlice({
             }
         },
 
+        [fetchRelatedExample.fulfilled]:(state, action)=>{
+            const data = action.payload
+            console.log("related examples",data)
 
+            return{
+                ...state,
+                relatedExamples:data
+
+            }
+        },
 
         [fetchCombinedPatterns.pending]:(state, action)=>{
             return{
@@ -258,18 +385,34 @@ const DataSlice = createSlice({
                 loadingCombinedPatterns:true
             }
         },
+
         [fetchCombinedPatterns.fulfilled]:(state, action)=>{
             const data = action.payload
+            let modelAnnotationCount = 0
             
             let selectedSetting = JSON.parse(JSON.stringify(state.selectedSetting))
 
             let dataset = JSON.parse(JSON.stringify(state.dataset))
 
             dataset.forEach((element, index) => {
+                if(data.scores[dataset[index].id] != 0.5){
+                    modelAnnotationCount += 1
+                }
                 dataset[index] = { ...dataset[index], score:data.scores[dataset[index].id]}
             });
             reorderDataset(dataset, selectedSetting)
+            
+
+            let selectedPatterns = {}
+            data.patterns.forEach((element)=>{
+                selectedPatterns[element['pattern']] = element['weight']
+            })
             console.log(data)
+
+            //place explanation in elements
+            // for (let [key, value] of Object.entries(p)) {
+            //     console.log(`${key}: ${value}`);
+            //   }
 
             return{
                 ...state,
@@ -277,9 +420,12 @@ const DataSlice = createSlice({
                 loadingCombinedPatterns: false,
                 explanation:data.explanation,
                 dataset: dataset,
+                modelAnnotationCount: modelAnnotationCount,
+                selectedPatterns:selectedPatterns,
 
             }
         },
+
         [changeSetting.fulfilled]:(state,action)=>{
 
             let dataset = JSON.parse(JSON.stringify(state.dataset))

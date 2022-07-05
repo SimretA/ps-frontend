@@ -81,8 +81,8 @@ export default function TabelView(props) {
                             const value = row[column.id];
                             return (
                                 <TableCell key={column.id} align={column.align}>
-                                {column.format && typeof value === 'number'
-                                    ? Number.parseFloat(value+1).toFixed(2)
+                                {typeof(value )=== 'number'
+                                    ? parseFloat(value).toFixed(2)
                                     : value}
                                 </TableCell>
                             );
