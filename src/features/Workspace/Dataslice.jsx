@@ -376,7 +376,8 @@ const DataSlice = createSlice({
 
             return{
                 ...state,
-                relatedExamples:data
+                relatedExamples:data[0],
+                relatedExplanation:data[1],
 
             }
         },

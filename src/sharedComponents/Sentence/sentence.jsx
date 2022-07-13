@@ -292,7 +292,7 @@ export default function AccordionSentence(props) {
 
                     
 
-                    {!loading && workspace.relatedExamples.map(element=><SentenceLight show={true} element={element} handleBatchLabel={handleBatchLabel} sentence={element.example} key={`lightsent_${element.id}`}/>)}
+                    {!loading && workspace.relatedExamples.map(element=><SentenceLight show={true} highlight={workspace.relatedExplanation[element.id]} element={element} handleBatchLabel={handleBatchLabel} sentence={element.example} key={`lightsent_${element.id}`}/>)}
 
 
                 </Stack>}
