@@ -20,7 +20,7 @@ export default function CustomPopover(props) {
   const id = open ? 'simple-popover' : undefined;
 
   const phraseLabeling=(id, label)=>{
-    props.handleClose()
+    props.handleClose(label)
 
   }
 

@@ -7,13 +7,32 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import { LinearProgress } from '@material-ui/core';
-import { Typography } from '@mui/material';
+import { IconButton, LinearProgress } from '@material-ui/core';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 export default function TabelView(props) {
   const [page, setPage] = React.useState(0);
   
   const [locked, setLocked] = React.useState(false);
+
+  const handleVisiblityLock = (row)=>{
+    if(!locked  && props.setHovering){
+        props.setHovering(row['pattern'])
+        setLocked(true)
+
+    }
+    else if (locked && props.setHovering){
+        if(props.hovering==row['pattern']){
+            setLocked(false)
+            props.setHovering(null)
+
+        }else{
+            props.setHovering(row['pattern'])
+        }
+    }
+
+  }
 
   return (
     <Paper sx={{ width: '100%',  paddingBottom:"20px", overflow:"hidden", marginBottom:"5px" }}>
@@ -45,37 +64,6 @@ export default function TabelView(props) {
 
                         sx={{...props.hovering==row['pattern'] &&{backgroundColor:"#f5f5f5"}}}
 
-                        onMouseEnter={()=>{
-                            if(!locked && props.setHovering){
-                                props.setHovering(row['pattern'])
-                            }
-                        }}
-                        onMouseLeave={()=>{
-                            if(!locked && props.setHovering){
-                                props.setHovering(null)
-                                // console.log("Mouse leaving ", row['pattern'])
-                            }
-                            
-                        }}
-
-                        onClick={()=>{
-                            // console.log("selected pattern ", props.hovering)
-                            if(!locked  && props.setHovering){
-                                props.setHovering(row['pattern'])
-                                setLocked(true)
-
-                            }
-                            else if (locked && props.setHovering){
-                                if(props.hovering==row['pattern']){
-                                    setLocked(false)
-                                    props.setHovering(null)
-
-                                }else{
-                                    props.setHovering(row['pattern'])
-                                }
-                            }
-
-                        }}
                         >
                             {props.columns.map((column) => {
                             const value = row[column.id];
@@ -87,6 +75,7 @@ export default function TabelView(props) {
                                 </TableCell>
                             );
                             })}
+                            <TableCell key={'filter'}><IconButton onClick={()=>handleVisiblityLock(row)}>{props.hovering==row['pattern']?<VisibilityOffIcon/>:<VisibilityIcon/>}</IconButton></TableCell>
                         </TableRow>
                         );
                     })}

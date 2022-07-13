@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-const base_url = 'http://34.135.64.207:8080'
+// const base_url = 'http://34.67.194.132:8081'
+const base_url = 'http://129.74.153.250:8080'
 
 const settingsEnum = Object.freeze({
     0: "Do not Reorder",
@@ -353,10 +354,11 @@ const DataSlice = createSlice({
 
         [fetchPatterns.fulfilled]:(state, action)=>{
             const data = action.payload
-            console.log(data)
             if(data.message){
                 return{
                     ...state,
+                    loadingPatterns: false,
+                    modelAnnotationCount:0,
                 }
             }
 
@@ -380,6 +382,8 @@ const DataSlice = createSlice({
         },
 
         [fetchCombinedPatterns.pending]:(state, action)=>{
+            
+
             return{
                 ...state,
                 loadingCombinedPatterns:true
@@ -388,6 +392,17 @@ const DataSlice = createSlice({
 
         [fetchCombinedPatterns.fulfilled]:(state, action)=>{
             const data = action.payload
+            console.log("combine patterns has this ", data)
+
+            if(data.message){
+                return{
+                    ...state,
+                    modelAnnotationCount:0,
+                    loadingCombinedPatterns: false,
+                }
+            }
+
+            console.log("combined patters are ", data)
             let modelAnnotationCount = 0
             
             let selectedSetting = JSON.parse(JSON.stringify(state.selectedSetting))

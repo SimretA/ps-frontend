@@ -24,6 +24,7 @@ export default function AccordionSentence(props) {
     const [expandMore, setExpandMore] = React.useState(false)
     const [labeled, setLabeled] = React.useState(props.element.user_label)
     const[loading, setLoading] = React.useState(false)
+    const[activateSelection, setActivateSelection] = React.useState(false)
 
 
     // React.useEffect(()=>{
@@ -64,7 +65,7 @@ export default function AccordionSentence(props) {
         }else{
             setLoading(true)
 
-            dispatch(fetchRelatedExample({"id":props.focusedId})).then(()=>{
+            dispatch(fetchRelatedExample({"id":props.element.id})).then(()=>{
                 setLoading(false)
               })
 
@@ -195,6 +196,7 @@ export default function AccordionSentence(props) {
         }
 
         const handleUnmatch=(key, label)=>{
+            setActivateSelection(true)
             let matched = {...matchedParts}
             matched[key] = [0]
             setMatchedParts(matched)
@@ -204,9 +206,16 @@ export default function AccordionSentence(props) {
         }
 
     return (
-        <Accordion elevation={2} expanded={props.focusedId==props.element.id} 
-                    onClick={()=>props.setFocusedId(props.element.id)}>
+        <Accordion elevation={2} expanded={props.focusedId==props.index} 
+                    onClick={()=>{
+                        console.log("Clicked")
+                        props.setFocusedId(props.index)
+                    }}
+                    sx={{
+                        ...expandMore && {position:"sticky",top: 0}
+                    }}>
             <AccordionSummary
+            sx={{userSelect:"text"}}
             
             aria-controls="panel1bh-content"
             id="panel1bh-header"
@@ -225,6 +234,7 @@ export default function AccordionSentence(props) {
                             fontWeight:500}}
                             color="text.secondary" align='left'
                             variant="body2" display="block" gutterBottom
+                            onMouseUp={(event)=>props.getSelection(event)}
                         >
 
                             <Stack  direction={"row"} spacing={1} maxWidth={"100%"} overflow={"hidden"} sx={{flexWrap: "wrap"}}>
@@ -236,9 +246,9 @@ export default function AccordionSentence(props) {
                                     color="text.secondary" align='left'
                                     variant="body2" display="block" gutterBottom
                                 >
-                                    <Stack  direction={"row"} spacing={1} maxWidth={"100%"} overflow={"hidden"} sx={{flexWrap: "wrap"}}>
+                                    <Stack  direction={"row"} spacing={1} maxWidth={"100%"} overflow={"hidden"} sx={{flexWrap: "wrap", zIndex:10}}>
                                         
-                                        {matchedParts && Object.keys(matchedParts).map((key,index)=><Highlight key={`sent_${props.id}_${index}`} score={props.score} word={key} matched={matchedParts[key][0]} deleteMatched={handleUnmatch}
+                                        {matchedParts && Object.keys(matchedParts).map((key,index)=><Highlight key={`sent_${props.element.id}_${index}`} score={props.score} word={key} matched={matchedParts[key][0]} deleteMatched={handleUnmatch}
                                                         start={matchedParts[key][1]} 
                                                         end={matchedParts[key][2]}
                                                         patterns = {matchedParts[key][3]}
@@ -261,16 +271,20 @@ export default function AccordionSentence(props) {
             <AccordionDetails>
 
                 <Stack direction={"row"} spacing={2}>
-                    <Typography sx={{ fontSize: 14, fontWeight:200 }} color="text.secondary" align='left' m={1}>Is this about {props.theme}? </Typography>
-                    <Button size="small" variant={labeled==1?"contained":"outlined"} color="success" onClick={()=>handleLabeling(props.element.id, 1)} >Yes</Button>
-                    <Button size="small" variant={labeled==0?"contained":"outlined"} color="error" onClick={()=>handleLabeling(props.element.id, 0)}>No</Button>
+                    {!activateSelection?<>
+                        <Typography sx={{ fontSize: 14, fontWeight:200 }} color="text.secondary" align='left' m={1}>Is this about {props.theme}? </Typography>
+                        <Button size="small" variant={labeled==1?"contained":"outlined"} color="success" onClick={()=>handleLabeling(props.element.id, 1)} >Yes</Button>
+                        <Button size="small" variant={labeled==0?"contained":"outlined"} color="error" onClick={()=>handleLabeling(props.element.id, 0)}>No</Button>
+                    </>:
+                        <Typography sx={{ fontSize: 14, fontWeight:200 }} color="text.secondary" align='left' m={1}>Please select phrase about {props.theme}. </Typography>
+                    }
 
                     {props.score>0.5 && <Button onClick={()=>handleShowMore()}>{expandMore?"Done":"See More"}</Button>}
 
                    
                 </Stack>
 
-                {expandMore && <Stack direction={"column"}>
+                {expandMore && <Stack direction={"column"} maxHeight={"50vw"} overflow={"auto"}>
 
                     <Divider/>
 
@@ -278,7 +292,7 @@ export default function AccordionSentence(props) {
 
                     
 
-                    {!loading && workspace.relatedExamples.map(element=><SentenceLight element={element} handleBatchLabel={handleBatchLabel} sentence={element.example} key={`lightsent_${element.id}`}/>)}
+                    {!loading && workspace.relatedExamples.map(element=><SentenceLight show={true} element={element} handleBatchLabel={handleBatchLabel} sentence={element.example} key={`lightsent_${element.id}`}/>)}
 
 
                 </Stack>}

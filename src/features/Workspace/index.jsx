@@ -7,23 +7,25 @@ import AccordionSentence from '../../sharedComponents/Sentence/sentence';
 import TabelView from '../../sharedComponents/TableView';
 import Header from '../HeaderComponent';
 import Summary from '../../sharedComponents/Summary';
-import {clearAnnotation, fetchDataset, batchLabelData, labelData, fetchPatterns, fetchCombinedPatterns, fetchThemes, fetchSelectedTheme, setTheme} from "./Dataslice"
+import {clearAnnotation, fetchDataset, labelPhrase, labelData, fetchPatterns, fetchCombinedPatterns, fetchThemes, fetchSelectedTheme, setTheme} from "./Dataslice"
 import Scroller from '../MarkedScrollbar';
 
 import Fab from '@mui/material/Fab';
 import Sidebar from '../sidebar';
 import CustomPopover from '../../sharedComponents/CustomPopover';
+import SentenceLight from '../../sharedComponents/Sentence/sentenceLight';
 
 
 function Workspace() {
 
     //States 
-    const [focusedId, setFocusedId] = React.useState(null);
+    const [focusedId, setFocusedId] = React.useState(0);
     const [labelCounter, setLabelCounter] = React.useState(0);
     const [hovering, setHovering] = React.useState(null)
     const [positiveIds, setPositiveIds] = React.useState({})
     const [scrollPosition, setScrollPosition] = React.useState(0);
     const [openSideBar, setOpenSideBar] = React.useState(false);
+    
 
 
     //Context menu
@@ -118,13 +120,18 @@ function Workspace() {
 
       },[labelCounter])
 
+      const filterHovering = (hovering)=>{
+        let filteredDataset = []
+        const exp = workspace.explanation[hovering]
+        console.log(exp)
+      }
+
     const workspace = useSelector(state => state.workspace)
 
     const dispatch = useDispatch();
 
 
   return (<Stack direction={"column"}  sx={{height:"100vh"}}>
-      <Sidebar open={openSideBar} setOpen={setOpenSideBar} focusedId={focusedId} />
       <Header setTheme={handleChangeTheme} selectedTheme={workspace.selectedTheme} themes={workspace.themes} retrain={retrain} labeled={labelCounter} annotationPerRetrain={workspace.annotationPerRetrain} modelAnnotationCount={workspace.modelAnnotationCount} totalDataset={workspace.totalDataset} userAnnotationCount={workspace.userAnnotationCount}/>
       <Scroller dataset={workspace.dataset} scrollPosition={scrollPosition} show={!hovering}/>
       <Stack direction={"row"} sx={{ height: '90vh',}} mt={"10vh"} ml={1}>
@@ -134,8 +141,9 @@ function Workspace() {
               
               setScrollPosition(event.target.scrollTop/event.target.scrollHeight)
              }}>
-            {workspace.dataset.map(element => <AccordionSentence 
+            {!hovering && workspace.dataset.map((element, index) => <AccordionSentence 
                                                 seeMore={setOpenSideBar}
+                                                index = {index}
                                                 positiveIds={positiveIds} setPositiveIds={handleAddToPos}
                                                 explanation={hovering && workspace.explanation? workspace.explanation[hovering][element.id]:null}
                                                 hovering={hovering} score={element.score} key={`sentt_${element.id}`} 
@@ -147,7 +155,14 @@ function Workspace() {
                                                 retrain={handleBatchLabeling}
                                                 />)}
 
-            {hovering && Object.keys(positiveIds).length>0 && 
+            {hovering && workspace.explanation && workspace.dataset.map(element =>
+                        <SentenceLight show={workspace.explanation[hovering][element.id]} 
+                                      element={element} handleBatchLabel={handleAddToPos} 
+                                      sentence={element.example} key={`lightsent_hovering_${element.id}`} />)
+
+            }
+
+            {hovering &&  Object.keys(positiveIds).length>0 && 
             <Fab  
                 sx={{position:"sticky", bottom:"50px", marginLeft:"20px"}} 
                 color={"primary"} 
@@ -198,9 +213,18 @@ function Workspace() {
             </Box>
           
           <CustomPopover open={showContextMenu} anchorPoint={anchorPoint} 
-          handleClose={()=>{
+          handleClose={(label)=>{
+
+            let selected = window.getSelection().toString()
+
+            dispatch(labelPhrase({"phrase":selected, "label":label}))
+                      .then(()=>{
+                        retrain()
+                      })
             setShowContextMenu(false)
             setAnchorPoint(null)
+
+
             }}/>
       </Stack>
 
