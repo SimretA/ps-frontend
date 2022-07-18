@@ -14,7 +14,7 @@ import Fab from '@mui/material/Fab';
 import Sidebar from '../sidebar';
 import CustomPopover from '../../sharedComponents/CustomPopover';
 import SentenceLight from '../../sharedComponents/Sentence/sentenceLight';
-
+import Popover from '@mui/material/Popover';
 
 function Workspace() {
 
@@ -26,11 +26,15 @@ function Workspace() {
     const [scrollPosition, setScrollPosition] = React.useState(0);
     const [openSideBar, setOpenSideBar] = React.useState(false);
     
+    const workspace = useSelector(state => state.workspace)
 
+    const dispatch = useDispatch();
 
     //Context menu
     const [anchorPoint, setAnchorPoint] = React.useState(null);
     const [showContextMenu, setShowContextMenu] = React.useState(false);
+    const [popoverAnchor, setPopoverAnchor] = React.useState(null);
+    const [popoverContent, setPopoverContent] = React.useState(null);
 
 
     const getSelection = (event)=>{
@@ -111,14 +115,14 @@ function Workspace() {
         }, []);
       
       React.useEffect(()=>{
-        if(labelCounter==workspace.annotationPerRetrain){
-            setLabelCounter(0)
+        if(workspace.userAnnotationCount>0 && workspace.userAnnotationCount%workspace.annotationPerRetrain==0){
+            
             dispatch(fetchPatterns()).then(()=>{
               dispatch(fetchCombinedPatterns())
             })
         }
 
-      },[labelCounter])
+      },[workspace.userAnnotationCount])
 
       const filterHovering = (hovering)=>{
         let filteredDataset = []
@@ -126,16 +130,24 @@ function Workspace() {
         console.log(exp)
       }
 
-    const workspace = useSelector(state => state.workspace)
+      React.useEffect(()=>{
+        console.log("new anchor ",popoverAnchor)
 
-    const dispatch = useDispatch();
+      },[popoverAnchor])
+
 
 
   return (<Stack direction={"column"}  sx={{height:"100vh"}}>
-      <Header setTheme={handleChangeTheme} selectedTheme={workspace.selectedTheme} themes={workspace.themes} retrain={retrain} labeled={labelCounter} annotationPerRetrain={workspace.annotationPerRetrain} modelAnnotationCount={workspace.modelAnnotationCount} totalDataset={workspace.totalDataset} userAnnotationCount={workspace.userAnnotationCount}/>
+      <Header setTheme={handleChangeTheme} 
+              selectedTheme={workspace.selectedTheme} 
+              themes={workspace.themes} retrain={retrain} 
+               annotationPerRetrain={workspace.annotationPerRetrain} 
+              modelAnnotationCount={workspace.modelAnnotationCount} totalDataset={workspace.totalDataset} 
+              userAnnotationCount={workspace.userAnnotationCount}/>
       <Scroller dataset={workspace.dataset} scrollPosition={scrollPosition} show={!hovering}/>
-      <Stack direction={"row"} sx={{ height: '90vh',}} mt={"10vh"} ml={1}>
+      <Stack direction={"row"} sx={{ height: '94vh',}} mt={"8vh"} ml={1}>
 
+            {/* <Box style={{maxHeight: '100%',maxWidth:'15vw',minWidth:'15vw', overflow: 'auto'}}></Box> */}
             <Box style={{maxHeight: '100%',maxWidth:'50vw',minWidth:'50vw', overflow: 'auto'}} 
             onScroll={(event)=>{
               
@@ -147,12 +159,15 @@ function Workspace() {
                                                 positiveIds={positiveIds} setPositiveIds={handleAddToPos}
                                                 explanation={hovering && workspace.explanation? workspace.explanation[hovering][element.id]:null}
                                                 hovering={hovering} score={element.score} key={`sentt_${element.id}`} 
-                                                element={element} focusedId={focusedId} 
+                                                elementId={element.id} 
+                                                example={element.example}
+                                                focused={focusedId==index} 
                                                 setFocusedId={setFocusedId} theme={workspace.selectedTheme} 
-                                                labelCounter={labelCounter} setLabelCounter={setLabelCounter}
                                                 annotationPerRetrain={workspace.annotationPerRetrain}
                                                 getSelection={getSelection}
                                                 retrain={handleBatchLabeling}
+                                                setPopoverAnchor={setPopoverAnchor}
+                                                setPopoverContent={setPopoverContent}
                                                 />)}
 
             {hovering && workspace.explanation && workspace.dataset.map(element =>
@@ -226,7 +241,32 @@ function Workspace() {
 
 
             }}/>
+
       </Stack>
+
+
+      <Popover id={"generaluse_popover"} anchorEl={popoverAnchor} 
+                open={Boolean(popoverAnchor)}  
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left',
+                }}
+                sx={{
+                  pointerEvents: 'none',
+                  }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'left',
+                }}
+                disableRestoreFocus
+                children={popoverContent}
+
+               />
+
+            {/* {popoverContent}
+            
+            
+      </Popover> */}
 
      
     </Stack>

@@ -22,21 +22,22 @@ export default function AccordionSentence(props) {
     const [matchedIndex, setMatchedIndex] = React.useState(null)
     const [sentence, setSentence] = React.useState(null)
     const [expandMore, setExpandMore] = React.useState(false)
-    const [labeled, setLabeled] = React.useState(props.element.user_label)
+    const [labeled, setLabeled] = React.useState(workspace.userLabel[props.elementId])
     const[loading, setLoading] = React.useState(false)
     const[activateSelection, setActivateSelection] = React.useState(false)
 
 
-    // React.useEffect(()=>{
-    //     setSentence(props.element.example)
-    // }, [])
+
+    React.useEffect(()=>{
+        setSentence(props.example)
+    }, [])
 
     useEffect(()=>{
         if(props.score>0.5){
-            setMatchedParts(getMatchedParts(props.element.id, props.element.example))
+            setMatchedParts(getMatchedParts(props.elementId, props.example))
         }else{
             let parts = {}
-            parts[`${props.element.example}`] = [false, 0, -1, []]
+            parts[`${props.example}`] = [false, 0, -1, []]
             setMatchedParts(parts)
         }
 
@@ -50,7 +51,7 @@ export default function AccordionSentence(props) {
         setLabeled(label)
         
         dispatch(labelData({ element_id: element_id, label: label })).then(()=>{
-            props.setLabelCounter(props.labelCounter+1)
+            
 
             
         })
@@ -59,13 +60,13 @@ export default function AccordionSentence(props) {
     const handleShowMore = () =>{
 
         if(expandMore){
-            //TODO Retrain here
+
             setExpandMore(false)
             props.retrain()
         }else{
             setLoading(true)
 
-            dispatch(fetchRelatedExample({"id":props.element.id})).then(()=>{
+            dispatch(fetchRelatedExample({"id":props.elementId})).then(()=>{
                 setLoading(false)
               })
 
@@ -77,7 +78,7 @@ export default function AccordionSentence(props) {
     const handleBatchLabel =(element_id, label)=>{
 
         props.setPositiveIds({element_id, label})
-        console.log("batch setting ", props.positiveIds[props.element.id])
+        console.log("batch setting ", props.positiveIds[props.elementId])
     }
 
     const getMatchedParts = (id, sentence) =>{
@@ -206,7 +207,7 @@ export default function AccordionSentence(props) {
         }
 
     return (
-        <Accordion elevation={2} expanded={props.focusedId==props.index} 
+        <Accordion elevation={2} expanded={props.focused} 
                     onClick={()=>{
                         console.log("Clicked")
                         props.setFocusedId(props.index)
@@ -225,8 +226,8 @@ export default function AccordionSentence(props) {
 
                     <Stack spacing={1} direction={"column"}>
                         {/* {props.element.user_label!=null || labeled && <Chip label={props.element.user_label || labeled==1?`Labeled ${props.theme}`:labelData==0?`Labeled not`:''} variant={"filled"} color={props.element.user_label?"success":"error"} size='small'  sx={{mr:"5px"}}/>} */}
-                        {labeled!=null && <Chip label={labeled==1?`Labeled ${props.theme}`:`Labeled not`} variant={"filled"} color={labeled?"success":"error"} size='small'  sx={{mr:"5px"}}/>}
-                        {props.score!=null && props.score!=0.5 && <Chip label={props.element.score>0.5?`Predicted ${props.theme}`:`Predicted not`} color={props.element.score>0.5?"success":"error"} size='small' variant='outlined' sx={{mr:"5px"}}/>}
+                        {labeled!=null && <Chip label={labeled==1?`Labeled ${props.theme}`:`Labeled not`} variant={"filled"} color={labeled==1?"success":"error"} size='small'  sx={{mr:"5px"}}/>}
+                        {/* {props.score!=null && props.score!=0.5 && <Chip label={props.element.score>0.5?`Predicted ${props.theme}`:`Predicted not`} color={props.element.score>0.5?"success":"error"} size='small' variant='outlined' sx={{mr:"5px"}}/>} */}
                     </Stack>
 
 
@@ -248,14 +249,21 @@ export default function AccordionSentence(props) {
                                 >
                                     <Stack  direction={"row"} spacing={1} maxWidth={"100%"} overflow={"hidden"} sx={{flexWrap: "wrap", zIndex:10}}>
                                         
-                                        {matchedParts && Object.keys(matchedParts).map((key,index)=><Highlight key={`sent_${props.element.id}_${index}`} score={props.score} word={key} matched={matchedParts[key][0]} deleteMatched={handleUnmatch}
+                                        {matchedParts && Object.keys(matchedParts).map((key,index)=>
+                                        <Highlight key={`sent_${props.elementId}_${index}`} 
+                                                        score={props.score} word={key} 
+                                                        matched={matchedParts[key][0]} 
+                                                        deleteMatched={handleUnmatch}
                                                         start={matchedParts[key][1]} 
                                                         end={matchedParts[key][2]}
                                                         patterns = {matchedParts[key][3]}
-                                                        matchedWith={matchedIndex} />)}
+                                                        matchedWith={matchedIndex} 
+                                                        setPopoverAnchor={props.setPopoverAnchor}
+                                                        setPopoverContent={props.setPopoverContent}/>)}
 
 
-                                        {!matchedParts && <Highlight word={props.element.example} />}
+                                        {!matchedParts && <Highlight word={props.example} />}
+                                        {/* {props.element.example} */}
                                     </Stack>
                                     
                                     
@@ -273,8 +281,8 @@ export default function AccordionSentence(props) {
                 <Stack direction={"row"} spacing={2}>
                     {!activateSelection?<>
                         <Typography sx={{ fontSize: 14, fontWeight:200 }} color="text.secondary" align='left' m={1}>Is this about {props.theme}? </Typography>
-                        <Button size="small" variant={labeled==1?"contained":"outlined"} color="success" onClick={()=>handleLabeling(props.element.id, 1)} >Yes</Button>
-                        <Button size="small" variant={labeled==0?"contained":"outlined"} color="error" onClick={()=>handleLabeling(props.element.id, 0)}>No</Button>
+                        <Button size="small" variant={labeled==1?"contained":"outlined"} color="success" onClick={()=>handleLabeling(props.elementId, 1)} >Yes</Button>
+                        <Button size="small" variant={labeled==0?"contained":"outlined"} color="error" onClick={()=>handleLabeling(props.elementId,0)}>No</Button>
                     </>:
                         <Typography sx={{ fontSize: 14, fontWeight:200 }} color="text.secondary" align='left' m={1}>Please select phrase about {props.theme}. </Typography>
                     }

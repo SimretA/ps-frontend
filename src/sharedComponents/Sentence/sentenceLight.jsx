@@ -11,6 +11,7 @@ import { useEffect } from 'react';
 import Highlighter from "react-highlight-words";
 
 import './index.css'
+import { ListItem } from '@material-ui/core';
 
 
 
@@ -32,58 +33,35 @@ export default function SentenceLight(props) {
             // console.log("props ", props.highlight)
             let to_highlight = []
             props.highlight.forEach((element, index)=>{
+                // console.log("elements ", element.join(" "))
                 // to_highlight.push(element[0])
-                element.forEach(matches => {
-                    to_highlight.push(matches[0])
-                });
+                to_highlight.push(element)
+                // element.forEach(matches => {
+                //     to_highlight.push(matches[0])
+                // });
             })
-
 
 
 
             setToHighlight(to_highlight)
         }
         
-        // if(props.highlight){
-        //     let results = []
-        //     let sentence_array = props.element.example.split(" ")
-        //     let first_part = sentence_array.slice(0, props.highlight[0][1])
-        //     let second_part = ""
-        //     if(first_part!=""){
-        //         results = [...results, [0,first_part]]
-        //     }
-        //     props.highlight.forEach((element, index) => {
-        //         first_part =  sentence_array.slice(element[1], element[2])
-        //         results = [...results, [1,first_part]]
-
-        //         if(index!=props.highlight.length-1){
-        //             second_part = sentence_array.slice(element[2], props.highlight[index+1][0])
-        //             if(second_part!=""){
-        //                 results = [...results, [0,second_part]]
-        //             }
-
-        //         }
-                
-                
-        //     });
-
-        //     console.log(results)
-        // }
     },[])
 
     const Highlight = ({ children, highlightIndex }) => (
-        <span className="highlight">{children}</span>
+        <span className="highlight" >{children}</span>
       );
     
     return(<>
         {props.show ? 
         
-        <ListItemButton onClick={()=>{}}>
-            <Stack sx={{backgroundColor:"#eeeeee"}} direction={"row"} alignItems={"top"} >
+        <ListItem onClick={()=>{}}>
+            <Stack sx={{backgroundColor:"#eeeeee55", width:"100%", justifyContent: 'space-between'}} direction={"row"} alignItems={"top"}  >
                 <Typography color="text.secondary" align='left'
                 variant="body2" display="block" gutterBottom>
                      {!props.highlight && <>{props.element.example}</> }
-                     {props.highlight && <Highlighter highlightTag={Highlight} searchWords={toHighlight} textToHighlight={props.element.example} />}
+                     {props.highlight && 
+                     <Highlighter highlightTag={Highlight} searchWords={toHighlight} textToHighlight={props.element.example} />}
                 </Typography>
                 
                 <Stack direction={"row"} alignItems={"top"}>
@@ -95,7 +73,7 @@ export default function SentenceLight(props) {
 
 
             </Stack>
-        </ListItemButton>:
+        </ListItem>:
         <></>}
         </>
     )

@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-// const base_url = 'http://34.67.194.132:8081'
-const base_url = 'http://129.74.153.250:8080'
+const base_url = 'http://34.67.194.132:8081'
+// const base_url = 'http://129.74.153.250:8080'
 
 const settingsEnum = Object.freeze({
     0: "Do not Reorder",
@@ -12,6 +12,8 @@ const initialState = {
     workspace: "fairytale-bias-val-split",
     document: "storybook_sentence_val_split-assipattle_and_the_mester_stoorworm",
     dataset: [],
+    userLabel:{},
+    modelLabel:{},
     categories: [],
     rules: null,
     combinedRules: null,
@@ -35,7 +37,7 @@ const initialState = {
 }
 
 const reorderDataset = (dataset, setting)=>{
-    console.log("in reordeing ", setting)
+    // console.log("in reordeing ", setting)
 
     switch(`${setting}`) {
         case '0': //Do not Reorder
@@ -96,6 +98,23 @@ export const clearAnnotation = createAsyncThunk('workspace/clear', async (reques
     return data
 })
 
+export const explainPattern = createAsyncThunk('workspace/explainpattern', async (request, { getState }) => {
+
+    const state = getState()
+    const { pattern } = request
+
+    var url = new URL(`${base_url}/explain/${pattern}`)
+
+    const data = await fetch(url, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        },
+        method: "GET"
+    }).then( response => response.json())
+
+    return data
+})
 
 
 export const fetchDataset = createAsyncThunk('workspace/dataset', async (request, { getState }) => {
@@ -259,13 +278,35 @@ const DataSlice = createSlice({
         [fetchDataset.fulfilled]: (state, action) => {
             const data = action.payload
 
-            console.log("the dataset ", data)
+            // console.log("the dataset ", data)
 
             return {
                 ...state,
                 dataset: data,
                 ready: true,
                 totalDataset: data.length
+            }
+        },
+
+        [explainPattern.pending]: (state, action) => {
+            const data = action.payload
+
+            // console.log("the dataset ", data)
+
+            return {
+                ...state,
+                patternExp:null
+            }
+        },
+
+        [explainPattern.fulfilled]: (state, action) => {
+            const data = action.payload
+
+            // console.log("the dataset ", data)
+
+            return {
+                ...state,
+                patternExp: data
             }
         },
 
@@ -309,25 +350,23 @@ const DataSlice = createSlice({
         
         
         [labelData.fulfilled]:(state, action)=>{
-            let dataset = JSON.parse(JSON.stringify(state.dataset))
+            let userLabel = JSON.parse(JSON.stringify(state.userLabel))
             let userAnnotationCount = JSON.parse(JSON.stringify(state.userAnnotationCount))
-            console.log(dataset)
+            // console.log(dataset)
             const data = action.payload
-            const index = dataset.findIndex((element)=>element.id==data.id)
-
-            if(index!=-1){
-                if(!dataset[index].user_label){
-                    userAnnotationCount += 1
-                }
-                
-                dataset[index] = {...dataset[index], user_label:data.label}
-
+            
+            if(!userLabel[data.id]){
+                userAnnotationCount += 1
             }
+                
+            userLabel[data.id] = data.label
+
+            
 
             
             return{
                 ...state,
-                dataset:dataset,
+                userLabel: userLabel,
                 userAnnotationCount:userAnnotationCount
             }
 
@@ -354,6 +393,7 @@ const DataSlice = createSlice({
 
         [fetchPatterns.fulfilled]:(state, action)=>{
             const data = action.payload
+            console.log("fetch patterns ", data)
             if(data.message){
                 return{
                     ...state,
@@ -416,7 +456,7 @@ const DataSlice = createSlice({
                 }
                 dataset[index] = { ...dataset[index], score:data.scores[dataset[index].id]}
             });
-            reorderDataset(dataset, selectedSetting)
+            // reorderDataset(dataset, selectedSetting)
             
 
             let selectedPatterns = {}
@@ -447,7 +487,7 @@ const DataSlice = createSlice({
             let dataset = JSON.parse(JSON.stringify(state.dataset))
             const combinedPatterns = JSON.parse(JSON.stringify(state.combinedPatterns))
             if(Object.keys(combinedPatterns).length>0){
-                reorderDataset(dataset, action.payload.selectedSetting)
+                // reorderDataset(dataset, action.payload.selectedSetting)
             }
             return {
                 ...state,

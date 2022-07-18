@@ -12,14 +12,16 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+import { useDispatch, useSelector } from 'react-redux';
 
 export default function Header(props) {
       
+      
     
-      return <AppBar  sx={{maxHeight:"10vh"}} ml={2} color="inherit">
-            <Stack direction={"row"} ml={2} justifyContent="left"
+      return <AppBar  sx={{maxHeight:"8vh"}} ml={2} color="inherit">
+            <Stack direction={"rowx"} ml={2} justifyContent="left"
             
-            sx={{maxHeight:"10vh"}}
+            sx={{maxHeight:"8vh"}}
                   alignItems="center">
                   {/* <Typography>
                   This is where the magic happens</Typography> */}
@@ -28,7 +30,7 @@ export default function Header(props) {
 
             <Divider orientation="vertical" variant="middle" flexItem />
                   
-            <ProgressButton retrain={props.retrain} value={(props.labeled/props.annotationPerRetrain)*100}/>
+            <ProgressButton retrain={props.retrain} value={((props.userAnnotationCount%props.annotationPerRetrain)/props.annotationPerRetrain)*100}/>
 
             <Divider orientation="vertical" variant="middle" flexItem />
 

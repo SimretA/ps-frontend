@@ -30,39 +30,67 @@ export default function Highlight(props) {
 
 
     const getMatchingPatterns =()=>{
-        
+        // console.log("getting matching patterns")
+        let pats = []
         for (let index = props.start; index < props.end; index++) {
             // console.log("I got this ",props.matchedWith[index])
-            setPatterns([...patterns, ...props.matchedWith[index]])
+            // console.log(index, props.matchedWith[index])
+            pats = [...pats, ...props.matchedWith[index]]
             
         }
+        pats =  [... new Set(pats)]
 
+        return pats
 
+    }
+    const getChild = (patterns) =>{
 
+        const pats = getMatchingPatterns()
+
+        return (<>
+        
+        {/* <h2>hello</h2> */}
+        { pats.map((pattern, index)=><><em key={`pat_${index}`}>{pattern}</em>: { parseFloat(workspace.selectedPatterns[pattern]).toFixed(2)}<br/></>)}
+         </>
+
+        )
     }
 
     const handlePopoverOpen = (event) => {
-        
-        // if(props.matchedWith && props.matchedWith.length>0){
+            
             if(props.matched){
+                // getMatchingPatterns()
+                // console.log()
 
-            setAnchorEl(event.currentTarget);
-            // console.log(props.matchedWith)
-            // console.log(props.start, props.end, props.word)
-            getMatchingPatterns()
-            setShowDelete(true)
+                props.setPopoverAnchor(event.currentTarget)
+                props.setPopoverContent(getChild(patterns))
+            }
+        
+        // // if(props.matchedWith && props.matchedWith.length>0){
+        //     if(props.matched){
 
-            // console.log(patterns)
-            // console.log(props.matchedWith[props.index])
+        //     setAnchorEl(event.currentTarget);
+        //     // console.log(props.matchedWith)
+        //     // console.log(props.start, props.end, props.word)
+        //     getMatchingPatterns()
+        //     setShowDelete(true)
 
-            // console.log(workspace.selectedPatterns[props.matchedWith[props.index]])
-        }
+        //     // console.log(patterns)
+        //     // console.log(props.matchedWith[props.index])
+
+        //     // console.log(workspace.selectedPatterns[props.matchedWith[props.index]])
+        // }
       };
     
       const handlePopoverClose = () => {
-        setAnchorEl(null);
-        setPatterns([])
-        setShowDelete(false)
+        // setAnchorEl(null);
+        // setPatterns([])
+        // setShowDelete(false)
+
+        if(props.matched){
+            props.setPopoverAnchor(null)
+            props.setPopoverContent(null)
+        }
       };
 
       const handleClick = () => {

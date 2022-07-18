@@ -20,3 +20,6 @@
     top: 0px !important;
     right: 0px !important;
 }
+.highlight:hover{
+    background-color: #999fdb;
+}
