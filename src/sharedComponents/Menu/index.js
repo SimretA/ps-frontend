@@ -52,18 +52,16 @@ export default function Settings(props) {
         row
         aria-labelledby="demo-row-radio-buttons-group-label"
         name="row-radio-buttons-group"
-        value = {workspace.selectedSetting}
+        value = {workspace.selectedSetting?workspace.selectedSetting:""}
         onChange={(event) => handleMenuItemClick(event, event.target.value)}
 
         sx={{height:"10vh"}}
       >
 
-    {Object.keys(options).map((key) => <FormControlLabel value={key} control={<Radio />} 
+    {Object.keys(options).map((key) => <FormControlLabel value={key}  key={`setting_${key}`} control={<Radio />} 
     label={<Typography 
       sx={{fontSize: 14,
-      fontWeight:100,}} 
-      
-      color="text.secondary"> {options[key]} </Typography>}/> )}
+      fontWeight:100,}} > {options[key]} </Typography>}/> )}
         
         
       </RadioGroup>

@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { CSS_COLOR_NAMES } from '../../assets/color_assets';
+
 const base_url = 'http://34.67.194.132:8081'
 // const base_url = 'http://129.74.153.250:8080'
+
+
 
 const settingsEnum = Object.freeze({
     0: "Do not Reorder",
@@ -33,7 +37,9 @@ const initialState = {
     selectedPatterns:{},
     themes:[],
     relatedExamples:[],
-    selectedTheme:null
+    selectedTheme:null,
+    element_to_label:{},
+    color_code:{}
 }
 
 const reorderDataset = (dataset, setting)=>{
@@ -177,6 +183,42 @@ export const labelData = createAsyncThunk('workspace/labelData', async (request,
     return data
 })
 
+
+export const multiLabelData = createAsyncThunk('workspace/multiLabelData', async (request, { getState }) => {
+    
+    const { elementId, label } = request
+    var url = new URL(`${base_url}/label/${elementId}/${label}`)
+
+
+    const data = await fetch(url, {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: "POST"
+    }).then( response => response.json())
+
+    return data
+})
+
+
+export const deleteLabelData = createAsyncThunk('workspace/deleteLabelData', async (request, { getState }) => {
+    
+    const { elementId, label } = request
+    var url = new URL(`${base_url}/delete_label/${elementId}/${label}`)
+
+
+    const data = await fetch(url, {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: "POST"
+    }).then( response => response.json())
+
+    return data
+})
+
+
+
 export const setTheme = createAsyncThunk('workspace/setTheme', async (request, { getState }) => {
     
     const { theme } = request
@@ -272,6 +314,52 @@ const DataSlice = createSlice({
                 ...state,
                 curCategory: c
             }
+        },
+
+        updateElementLabel(state, action){
+
+            let userAnnotationCount = JSON.parse(JSON.stringify(state.userAnnotationCount))
+            
+            if(action.payload.event=="REMOVE"){
+                let element_to_label = JSON.parse(JSON.stringify(state.element_to_label))
+
+                if(element_to_label[action.payload.elementId]){
+                    element_to_label[action.payload.elementId] = element_to_label[action.payload.elementId].filter(word => word!= action.payload.label);
+                    return {
+                        ...state,
+                        element_to_label
+                    }
+                }
+
+            }else if(action.payload.event=="ADD"){
+                let element_to_label = JSON.parse(JSON.stringify(state.element_to_label))
+                if(!element_to_label[action.payload.elementId] || element_to_label[action.payload.elementId].indexOf(action.payload.label)==-1){
+                    userAnnotationCount += 1
+                }
+
+
+
+
+                if(element_to_label[action.payload.elementId]){
+                        element_to_label[action.payload.elementId] = [...element_to_label[action.payload.elementId], action.payload.label]
+                        console.log("userAnnotationCount", userAnnotationCount)
+                    
+                    
+
+                }else{
+                    element_to_label[action.payload.elementId] = [ action.payload.label]
+                }               
+                return{
+                    ...state,
+                    element_to_label,
+                    userAnnotationCount
+                }
+
+
+            }
+
+            
+
         }
     },
     extraReducers: {
@@ -312,10 +400,16 @@ const DataSlice = createSlice({
 
         [fetchThemes.fulfilled]: (state, action) => {
             const data = action.payload
+            let color_code = {}
+            data.forEach((element, index) => {
+                color_code[`${element}`] = CSS_COLOR_NAMES[index]
+                
+            });
 
             return {
                 ...state,
                 themes: data,
+                color_code
             }
         },
 
@@ -349,28 +443,29 @@ const DataSlice = createSlice({
         },
         
         
-        [labelData.fulfilled]:(state, action)=>{
-            let userLabel = JSON.parse(JSON.stringify(state.userLabel))
-            let userAnnotationCount = JSON.parse(JSON.stringify(state.userAnnotationCount))
-            // console.log(dataset)
+        [multiLabelData.fulfilled]:(state, action)=>{
             const data = action.payload
-            
-            if(!userLabel[data.id]){
-                userAnnotationCount += 1
-            }
-                
-            userLabel[data.id] = data.label
+            console.log(data)
 
-            
-
-            
-            return{
-                ...state,
-                userLabel: userLabel,
-                userAnnotationCount:userAnnotationCount
+            if(data.status != 200){
+                console.log("Something went wrong")
+                //TODO recover
             }
 
         },
+
+        [deleteLabelData.fulfilled]:(state, action)=>{
+            const data = action.payload
+            console.log(data)
+
+            if(data.status != 200){
+                console.log("Something went wrong")
+                //TODO recover
+            }
+
+        },
+
+
 
         [labelPhrase.fulfilled]:(state, action)=>{
             
@@ -500,3 +595,4 @@ const DataSlice = createSlice({
 })
 
 export default DataSlice.reducer;
+export const {updateElementLabel} = DataSlice.actions;

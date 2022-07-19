@@ -7,9 +7,10 @@ import { Chip, Stack, Button, CircularProgress, Divider } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Highlight from './Highlight';
 import { useDispatch, useSelector } from 'react-redux';
-import { labelData, fetchRelatedExample, labelPhrase } from '../../features/Workspace/Dataslice';
+import { labelData, fetchRelatedExample, labelPhrase, updateElementLabel, deleteLabelData } from '../../features/Workspace/Dataslice';
 import SentenceLight from './sentenceLight';
 import { useEffect } from 'react';
+import AddIcon from '@mui/icons-material/Add';
 
 
 export default function AccordionSentence(props) {
@@ -28,6 +29,7 @@ export default function AccordionSentence(props) {
 
 
 
+
     React.useEffect(()=>{
         setSentence(props.example)
     }, [])
@@ -42,8 +44,6 @@ export default function AccordionSentence(props) {
         }
 
     },[props.score])
-
-
 
 
     const handleLabeling = (element_id, label)=>{
@@ -206,6 +206,17 @@ export default function AccordionSentence(props) {
     
         }
 
+        const handleAddLabel=(event, label)=>{
+            props.setAnchorEl(event.currentTarget)
+            // setSentenceLabels([...sentenceLabels,"Hello"])
+
+        }
+
+        const handelDeleteLabel = (elementId, label)=>{
+            dispatch(updateElementLabel({elementId, label, event:"REMOVE"}))
+            dispatch(deleteLabelData({elementId, label}))
+        }
+
     return (
         <Accordion elevation={2} expanded={props.focused} 
                     onClick={()=>{
@@ -222,7 +233,7 @@ export default function AccordionSentence(props) {
             id="panel1bh-header"
             >
 
-                <Stack direction="row">
+                <Stack direction="column">
 
                     <Stack spacing={1} direction={"column"}>
                         {/* {props.element.user_label!=null || labeled && <Chip label={props.element.user_label || labeled==1?`Labeled ${props.theme}`:labelData==0?`Labeled not`:''} variant={"filled"} color={props.element.user_label?"success":"error"} size='small'  sx={{mr:"5px"}}/>} */}
@@ -270,7 +281,9 @@ export default function AccordionSentence(props) {
                                     </Typography>
                             </Stack>
                     </Typography>
-
+                    <Stack spacing={1} direction={"row"}>
+                        {!props.focused && workspace.element_to_label[props.elementId] && workspace.element_to_label[props.elementId].map(label=><Chip key={`${props.elementId}_${label}_light`} label={""} color={'primary'} sx={{backgroundColor:workspace.color_code[label], width:20, height:20}} size="small" />)}
+                    </Stack>
 
                 </Stack>
                     
@@ -280,9 +293,12 @@ export default function AccordionSentence(props) {
 
                 <Stack direction={"row"} spacing={2}>
                     {!activateSelection?<>
-                        <Typography sx={{ fontSize: 14, fontWeight:200 }} color="text.secondary" align='left' m={1}>Is this about {props.theme}? </Typography>
+                        {/* <Typography sx={{ fontSize: 14, fontWeight:200 }} color="text.secondary" align='left' m={1}>Is this about {props.theme}? </Typography>
                         <Button size="small" variant={labeled==1?"contained":"outlined"} color="success" onClick={()=>handleLabeling(props.elementId, 1)} >Yes</Button>
-                        <Button size="small" variant={labeled==0?"contained":"outlined"} color="error" onClick={()=>handleLabeling(props.elementId,0)}>No</Button>
+                    <Button size="small" variant={labeled==0?"contained":"outlined"} color="error" onClick={()=>handleLabeling(props.elementId,0)}>No</Button> */}
+                        {workspace.element_to_label[props.elementId] && workspace.element_to_label[props.elementId].map(label=><Chip key={`${props.elementId}_${label}`} label={label} color={'primary'} sx={{backgroundColor:workspace.color_code[label]}} size="small" onDelete={()=>handelDeleteLabel(props.elementId, label)}/>)}
+                        <Chip icon={<AddIcon />} label="Add Label" variant="outlined"  size="small" onClick={(event)=>handleAddLabel(event,props.elementId)} />
+
                     </>:
                         <Typography sx={{ fontSize: 14, fontWeight:200 }} color="text.secondary" align='left' m={1}>Please select phrase about {props.theme}. </Typography>
                     }

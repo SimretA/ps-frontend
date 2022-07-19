@@ -65,7 +65,7 @@ export default function TabelView(props) {
     <Popover
             open={openPopover}
             anchorEl={anchorPoint}
-            onClose={openPopover}
+            onClose={()=>setOpenPopover(false)}
             anchorOrigin={{
             vertical: 'top',
             horizontal: 'center',

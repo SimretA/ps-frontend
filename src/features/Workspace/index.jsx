@@ -15,6 +15,7 @@ import Sidebar from '../sidebar';
 import CustomPopover from '../../sharedComponents/CustomPopover';
 import SentenceLight from '../../sharedComponents/Sentence/sentenceLight';
 import Popover from '@mui/material/Popover';
+import LabelSelector from '../../sharedComponents/LabelSelector/labelselector';
 
 function Workspace() {
 
@@ -26,6 +27,8 @@ function Workspace() {
     const [scrollPosition, setScrollPosition] = React.useState(0);
     const [openSideBar, setOpenSideBar] = React.useState(false);
     
+    const [labelSelectorAnchor, setLabelSelectorAnchor] = React.useState(null);
+
     const workspace = useSelector(state => state.workspace)
 
     const dispatch = useDispatch();
@@ -138,7 +141,10 @@ function Workspace() {
 
 
   return (<Stack direction={"column"}  sx={{height:"100vh"}}>
+      <LabelSelector anchorEl={labelSelectorAnchor} setAnchorEl={setLabelSelectorAnchor} elementId={workspace.dataset[focusedId] && workspace.dataset[focusedId].id}/>
+
       <Header setTheme={handleChangeTheme} 
+              color_code={workspace.color_code}
               selectedTheme={workspace.selectedTheme} 
               themes={workspace.themes} retrain={retrain} 
                annotationPerRetrain={workspace.annotationPerRetrain} 
@@ -168,6 +174,7 @@ function Workspace() {
                                                 retrain={handleBatchLabeling}
                                                 setPopoverAnchor={setPopoverAnchor}
                                                 setPopoverContent={setPopoverContent}
+                                                setAnchorEl={setLabelSelectorAnchor}
                                                 />)}
 
             {hovering && workspace.explanation && workspace.dataset.map(element =>

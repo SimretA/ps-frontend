@@ -1,6 +1,6 @@
 import { AppBar, Typography } from "@material-ui/core";
 import React from "react";
-import { Stack } from "@mui/material";
+import { Stack, Chip } from "@mui/material";
 import Settings from "../../sharedComponents/Menu";
 import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
@@ -12,7 +12,6 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-import { useDispatch, useSelector } from 'react-redux';
 
 export default function Header(props) {
       
@@ -55,7 +54,7 @@ export default function Header(props) {
                               justifyContent: 'center',
                               }}
                               >
-                              <Typography variant="caption" component="div" color="text.secondary">
+                              <Typography variant="caption" component="div" >
                               {`${Math.round((props.userAnnotationCount/props.totalDataset)*100)}%`}
                               </Typography>
                               </Box>
@@ -82,7 +81,7 @@ export default function Header(props) {
                                           justifyContent: 'center',
                                           }}
                                           >
-                                                <Typography variant="caption" component="div" color="text.secondary">
+                                                <Typography variant="caption" component="div">
                                                 {`${Math.round((props.modelAnnotationCount/props.totalDataset)*100)}%`}
                                                 </Typography>
                                           </Box>
@@ -97,20 +96,20 @@ export default function Header(props) {
                   <Divider orientation="vertical" variant="middle" flexItem />
 
 
-                  <Stack width={"150px"}  p={2}>
+                  <Stack   p={2}>
 
                         {/* <Typography>{props.selectedTheme}</Typography> */}
 
-                        <FormControl fullWidth>
-                              <InputLabel id="demo-simple-select-label">{props.selectedTheme}</InputLabel>
+                        <FormControl >
+                              {/* <InputLabel id="demo-simple-select-label">{props.selectedTheme}</InputLabel> */}
                               <Select
                               labelId="demo-simple-select-label"
                               id="demo-simple-select"
-                              value={props.selectedTheme}
+                              value={props.selectedTheme?props.selectedTheme:""}
                               label="Theme"
                               onChange={event=>props.setTheme(event.target.value)}
                               >
-                                    {props.themes.map(theme=><MenuItem value={theme} key={`theme_${theme}`}>{theme}</MenuItem>)}
+                                    {props.themes.map((theme, index)=><MenuItem sx={{textTransform:"capitalize"}} value={theme} key={`theme_${theme}`}><Chip key={`menuitem_${theme}_light`} label={""} color={'primary'} sx={{backgroundColor:props.color_code[theme], width:20, height:20, marginRight:1}} size="small" /> {theme}</MenuItem>)}
                               </Select>
                         </FormControl>
                   </Stack>
