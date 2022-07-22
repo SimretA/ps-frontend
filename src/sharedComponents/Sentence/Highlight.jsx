@@ -17,7 +17,6 @@ import './index.css'
 import Popover from '@mui/material/Popover';
 
 
-
 export default function Highlight(props) {
 
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -110,6 +109,8 @@ export default function Highlight(props) {
             <span
                 onMouseEnter={handlePopoverOpen}
                 onMouseLeave={handlePopoverClose}
+                style={{...props.matched && { backgroundColor:`${lighten(workspace.color_code[workspace.selectedTheme], 0.5)}`}}}
+
                 className={ (props.matched)
                 ? workspace.selectedPatterns[props.patterns[0]]<0?'highlight_red':'highlight': "non-highlight"}>
 

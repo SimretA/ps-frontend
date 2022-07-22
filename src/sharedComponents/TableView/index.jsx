@@ -101,17 +101,19 @@ export default function TabelView(props) {
                         key={column.id}
                         align={column.align}
                         style={{ minWidth: column.minWidth }}
+                        sx={{backgroundColor:"#000000", color:"#FFFFFF"}}
                         >
                         {column.label}
                         </TableCell>
                     ))}
+                    <TableCell sx={{backgroundColor:"#000000", color:"#FFFFFF"}}></TableCell>
                     </TableRow>
                 </TableHead>
                 
                 <TableBody>
                     {props.data && props.data
                     // .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((row) => {
+                    .map((row, index) => {
                         return (
                         <TableRow hover role="checkbox" tabIndex={-1} key={row.code} 
 
@@ -126,10 +128,10 @@ export default function TabelView(props) {
                         
 
                         >
-                            {props.columns.map((column) => {
+                            {props.columns.map((column, index) => {
                             const value = row[column.id];
                             return (
-                                <TableCell key={column.id} align={column.align}>
+                                <TableCell sx={{ ...index==0&&{fontWeight:700}}} key={column.id} align={column.align}>
                                 {typeof(value )=== 'number'
                                     ? parseFloat(value).toFixed(2)
                                     : value}

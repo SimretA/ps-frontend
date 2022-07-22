@@ -16,6 +16,7 @@ import CustomPopover from '../../sharedComponents/CustomPopover';
 import SentenceLight from '../../sharedComponents/Sentence/sentenceLight';
 import Popover from '@mui/material/Popover';
 import LabelSelector from '../../sharedComponents/LabelSelector/labelselector';
+import { ProtectedRoute } from '../Auth/ProtectedRoute';
 
 function Workspace() {
 
@@ -101,6 +102,7 @@ function Workspace() {
    const handleChangeTheme=(value)=>{
     clear_session()
      dispatch(setTheme({"theme": value })).then(()=>{
+      retrain()
       
      })
      clear_session()
@@ -143,15 +145,16 @@ function Workspace() {
   return (<Stack direction={"column"}  sx={{height:"100vh"}}>
       <LabelSelector anchorEl={labelSelectorAnchor} setAnchorEl={setLabelSelectorAnchor} elementId={workspace.dataset[focusedId] && workspace.dataset[focusedId].id}/>
 
-      <Header setTheme={handleChangeTheme} 
+      <Header 
+              setTheme={handleChangeTheme} 
               color_code={workspace.color_code}
               selectedTheme={workspace.selectedTheme} 
               themes={workspace.themes} retrain={retrain} 
                annotationPerRetrain={workspace.annotationPerRetrain} 
               modelAnnotationCount={workspace.modelAnnotationCount} totalDataset={workspace.totalDataset} 
               userAnnotationCount={workspace.userAnnotationCount}/>
-      <Scroller dataset={workspace.dataset} scrollPosition={scrollPosition} show={!hovering}/>
-      <Stack direction={"row"} sx={{ height: '94vh',}} mt={"8vh"} ml={1}>
+      <Scroller color={workspace.color_code[workspace.selectedTheme]} dataset={workspace.dataset} scrollPosition={scrollPosition} show={!hovering}/>
+      <Stack direction={"row"} sx={{ height: '84vh',}} mt={"15vh"} ml={1}>
 
             {/* <Box style={{maxHeight: '100%',maxWidth:'15vw',minWidth:'15vw', overflow: 'auto'}}></Box> */}
             <Box style={{maxHeight: '100%',maxWidth:'50vw',minWidth:'50vw', overflow: 'auto'}} 
@@ -214,7 +217,7 @@ function Workspace() {
             </Box>
             <Box style={{maxHeight: '100%', maxWidth:'50vw',minWidth:'50vw', overflow: 'auto'}}>
             <Stack direction={"column"}>
-                <Summary data={workspace.combinedPatterns}/>
+                <Summary selectedTheme={workspace.selectedTheme} color={workspace.color_code[workspace.selectedTheme]} data={workspace.combinedPatterns}/>
                 <TabelView setHovering={setHovering} hovering={hovering}
                 loading={workspace.loadingCombinedPatterns} data={workspace.combinedPatterns.patterns} columns={[ { id: 'pattern', label: 'Pattern'},
                                                                 { id: 'weight', label: 'Weight'}, 
@@ -266,7 +269,39 @@ function Workspace() {
                   horizontal: 'left',
                 }}
                 disableRestoreFocus
-                children={popoverContent}
+                children={
+                  <>
+                      <Box
+                      sx={{
+                        position: "relative",
+                        mt: "10px",
+                        "&::before": {
+                          backgroundColor: "white",
+                          content: '""',
+                          display: "block",
+                          position: "absolute",
+                          width: 12,
+                          height: 12,
+                          top: -6,
+                          transform: "rotate(45deg)",
+                          left: "calc(50% - 6px)"
+                        }
+                      }}
+                    />
+                    <Box sx={{ p: 2, backgroundColor: "white" }}>
+                      { popoverContent}
+                    </Box>
+                 </>
+                
+                
+                
+                }
+                PaperProps={{
+                  style: {
+                    backgroundColor: "transparent",
+                    borderRadius: 1
+                  }
+                }}
 
                />
 
@@ -287,7 +322,7 @@ function Workspace() {
 export default {
     routeProps: {
       path: "/",
-      element: <Workspace />
+      element: <ProtectedRoute> <Workspace /> </ProtectedRoute>
     },
     name: 'workspace'
   };

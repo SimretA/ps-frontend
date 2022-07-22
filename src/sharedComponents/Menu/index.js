@@ -15,7 +15,15 @@ import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import { Typography } from '@material-ui/core';
 
+
+
+const styles = theme => ({
+  checked: {}
+})
+
 export default function Settings(props) {
+
+  
 
     const workspace = useSelector(state => state.workspace)
 
@@ -58,7 +66,9 @@ export default function Settings(props) {
         sx={{height:"10vh"}}
       >
 
-    {Object.keys(options).map((key) => <FormControlLabel value={key}  key={`setting_${key}`} control={<Radio />} 
+    {Object.keys(options).map((key) => <FormControlLabel size="small" value={key}  key={`setting_${key}`} 
+                                        control={<Radio sx={{color:workspace.color_code[workspace.selectedTheme]}} 
+                                        classes={{}} size="small" />} 
     label={<Typography 
       sx={{fontSize: 14,
       fontWeight:100,}} > {options[key]} </Typography>}/> )}

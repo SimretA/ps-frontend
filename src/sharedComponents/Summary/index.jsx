@@ -6,6 +6,8 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ListItem, List, ListItemText } from '@mui/material';
+import { Stack, Chip } from "@mui/material";
+
 
 
 export default function Summary(props) {
@@ -45,7 +47,8 @@ export default function Summary(props) {
             aria-controls="panel1a-content"
             id="panel1a-header"
             >
-            <Typography>Summary</Typography>
+            <Typography variant='h5'>Patterns for <Chip key={`menuitem_new_theme_light_summary`} label={""} color={'primary'} sx={{backgroundColor:props.color, width:20, height:20, marginRight:1,  mr: 1, my: 0.5 }} size="small" />
+            {props.selectedTheme}</Typography>
             </AccordionSummary>
             <AccordionDetails>
             <Typography>

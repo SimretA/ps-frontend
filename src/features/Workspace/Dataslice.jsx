@@ -1,8 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { CSS_COLOR_NAMES } from '../../assets/color_assets';
 
-const base_url = 'http://34.67.194.132:8081'
-// const base_url = 'http://129.74.153.250:8080'
+// const base_url = 'http://34.67.194.132:8081'
+const base_url = 'http://129.74.153.250:8080'
 
 
 
@@ -290,7 +290,7 @@ export const fetchPatterns = createAsyncThunk('workspace/patterns', async (reque
 export const fetchCombinedPatterns = createAsyncThunk('workspace/combinedpatterns', async (request, { getState }) => {
     const state = getState()
 
-    var url = new URL(`${base_url}/combinedpatterns`)
+    var url = new URL(`${base_url}/annotations`)
 
     const data = await fetch(url, {
         headers: {
@@ -314,6 +314,29 @@ const DataSlice = createSlice({
                 ...state,
                 curCategory: c
             }
+        },
+        addTheme(state, action){
+            let themes = JSON.parse(JSON.stringify(state.themes))
+
+            let color_code = JSON.parse(JSON.stringify(state.color_code))
+
+
+
+            const newTheme = action.payload.theme
+            const index = action.payload.index
+
+            //TODO input validation
+
+            themes = [...themes, newTheme]
+            color_code[`${newTheme}`] = CSS_COLOR_NAMES[index]
+
+            return {
+                ...state,
+                themes,
+                color_code
+            }
+
+
         },
 
         updateElementLabel(state, action){
@@ -595,4 +618,4 @@ const DataSlice = createSlice({
 })
 
 export default DataSlice.reducer;
-export const {updateElementLabel} = DataSlice.actions;
+export const {updateElementLabel, addTheme} = DataSlice.actions;

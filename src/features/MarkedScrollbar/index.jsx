@@ -25,12 +25,12 @@ export default function Scroller(props) {
     // })
 
     return (
-        <Stack mt={"5vh"} direction="column"  sx={{
+        <Stack mt={"15vh"} direction="column"  sx={{
             ...(!props.show) && {visibility:"hidden"},
-            backgroundColor:"none", height:"94vh", width:"10px", position:"absolute", left:"0vw", zIndex:10}}>
+            backgroundColor:"none", height:"84vh", width:"10px", position:"absolute", left:"0vw", zIndex:10}}>
             {props.dataset.map((data)=>
             <Paper sx={
-                {backgroundColor:data.score && data.score>0.5?`${darken('#86de8c', (data.score-0.5)/0.5)}`:data.score && data.score<0.5?`${lighten('#fc0b22', 1-data.score)}`:"none", 
+                {backgroundColor:data.score && data.score>0.5?`${darken(props.color, (data.score-0.5)/0.5)}`:data.score && data.score<0.5?`${lighten('#fc0b22', 1-data.score)}`:"none", 
                 height:`${(windowDimensions.height*.9)/props.dataset.length}px`, 
                 width:"15px", 
                 borderRadius:"0px"}}

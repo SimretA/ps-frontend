@@ -11,7 +11,8 @@ import { labelData, fetchRelatedExample, labelPhrase, updateElementLabel, delete
 import SentenceLight from './sentenceLight';
 import { useEffect } from 'react';
 import AddIcon from '@mui/icons-material/Add';
-
+import { darken, lighten } from '@material-ui/core';
+import Tooltip from '@mui/material/Tooltip';
 
 export default function AccordionSentence(props) {
 
@@ -64,6 +65,7 @@ export default function AccordionSentence(props) {
             setExpandMore(false)
             props.retrain()
         }else{
+            setExpandMore(true)
             setLoading(true)
 
             dispatch(fetchRelatedExample({"id":props.elementId})).then(()=>{
@@ -71,7 +73,7 @@ export default function AccordionSentence(props) {
               })
 
         }
-        setExpandMore(!expandMore)
+        
 
     }
 
@@ -217,6 +219,10 @@ export default function AccordionSentence(props) {
             dispatch(deleteLabelData({elementId, label}))
         }
 
+        const handleAcceptOrReject = (event) =>{
+            
+        }
+
     return (
         <Accordion elevation={2} expanded={props.focused} 
                     onClick={()=>{
@@ -235,55 +241,58 @@ export default function AccordionSentence(props) {
 
                 <Stack direction="column">
 
-                    <Stack spacing={1} direction={"column"}>
-                        {/* {props.element.user_label!=null || labeled && <Chip label={props.element.user_label || labeled==1?`Labeled ${props.theme}`:labelData==0?`Labeled not`:''} variant={"filled"} color={props.element.user_label?"success":"error"} size='small'  sx={{mr:"5px"}}/>} */}
-                        {labeled!=null && <Chip label={labeled==1?`Labeled ${props.theme}`:`Labeled not`} variant={"filled"} color={labeled==1?"success":"error"} size='small'  sx={{mr:"5px"}}/>}
-                        {/* {props.score!=null && props.score!=0.5 && <Chip label={props.element.score>0.5?`Predicted ${props.theme}`:`Predicted not`} color={props.element.score>0.5?"success":"error"} size='small' variant='outlined' sx={{mr:"5px"}}/>} */}
-                    </Stack>
+                    <Stack direction="row">
+                        <Stack spacing={1} direction={"column"}>
+                            {/* {props.element.user_label!=null || labeled && <Chip label={props.element.user_label || labeled==1?`Labeled ${props.theme}`:labelData==0?`Labeled not`:''} variant={"filled"} color={props.element.user_label?"success":"error"} size='small'  sx={{mr:"5px"}}/>} */}
+                            {/* {labeled!=null && <Chip label={labeled==1?`Labeled ${props.theme}`:`Labeled not`} variant={"filled"} color={labeled==1?"success":"error"} size='small'  sx={{mr:"5px"}}/>} */}
+                            {props.score!=null && props.score!=0.5 && <Tooltip describeChild title="Click to accept or reject"><Chip onClick={handleAcceptOrReject} label={props.score>0.5?`Predicted ${props.theme}`:`Predicted not`} color={props.score>0.5?"success":"error"} size='small' variant='outlined' sx={{mr:"5px",...props.score>0.5 &&{ border:`solid ${workspace.color_code[workspace.selectedTheme]}`, color:workspace.color_code[workspace.selectedTheme]}, borderRadius:"10px"}}/></Tooltip>}
+                        </Stack>
 
+                    
+                        <Typography sx={{ fontSize: 16,
+                                fontWeight:500}}
+                                color="text.secondary" align='left'
+                                variant="body2" display="block" gutterBottom
+                                onMouseUp={(event)=>props.getSelection(event)}
+                            >
 
-                    <Typography sx={{ fontSize: 16,
-                            fontWeight:500}}
-                            color="text.secondary" align='left'
-                            variant="body2" display="block" gutterBottom
-                            onMouseUp={(event)=>props.getSelection(event)}
-                        >
-
-                            <Stack  direction={"row"} spacing={1} maxWidth={"100%"} overflow={"hidden"} sx={{flexWrap: "wrap"}}>
-                                <Typography sx={{ fontSize: 16,
-                                    fontWeight:500, 
-                                    
-                                    // backgroundColor:`${lighten('#86de8c', 1-props.score)}`,
-                                }}
-                                    color="text.secondary" align='left'
-                                    variant="body2" display="block" gutterBottom
-                                >
-                                    <Stack  direction={"row"} spacing={1} maxWidth={"100%"} overflow={"hidden"} sx={{flexWrap: "wrap", zIndex:10}}>
+                                <Stack  direction={"row"} spacing={1} maxWidth={"100%"} overflow={"hidden"} sx={{flexWrap: "wrap"}}>
+                                    <Typography sx={{ fontSize: 16,
+                                        fontWeight:500, 
                                         
-                                        {matchedParts && Object.keys(matchedParts).map((key,index)=>
-                                        <Highlight key={`sent_${props.elementId}_${index}`} 
-                                                        score={props.score} word={key} 
-                                                        matched={matchedParts[key][0]} 
-                                                        deleteMatched={handleUnmatch}
-                                                        start={matchedParts[key][1]} 
-                                                        end={matchedParts[key][2]}
-                                                        patterns = {matchedParts[key][3]}
-                                                        matchedWith={matchedIndex} 
-                                                        setPopoverAnchor={props.setPopoverAnchor}
-                                                        setPopoverContent={props.setPopoverContent}/>)}
+                                        // backgroundColor:`${lighten('#86de8c', 1-props.score)}`,
+                                    }}
+                                        color="text.secondary" align='left'
+                                        variant="body2" display="block" gutterBottom
+                                    >
+                                        <Stack  direction={"row"} spacing={1} maxWidth={"100%"} overflow={"hidden"} sx={{flexWrap: "wrap", zIndex:10}}>
+                                            
+                                            {matchedParts && Object.keys(matchedParts).map((key,index)=>
+                                            <Highlight key={`sent_${props.elementId}_${index}`} 
+                                                            score={props.score} word={key} 
+                                                            matched={matchedParts[key][0]} 
+                                                            deleteMatched={handleUnmatch}
+                                                            start={matchedParts[key][1]} 
+                                                            end={matchedParts[key][2]}
+                                                            patterns = {matchedParts[key][3]}
+                                                            matchedWith={matchedIndex} 
+                                                            setPopoverAnchor={props.setPopoverAnchor}
+                                                            setPopoverContent={props.setPopoverContent}/>)}
 
 
-                                        {!matchedParts && <Highlight word={props.example} />}
-                                        {/* {props.element.example} */}
-                                    </Stack>
-                                    
-                                    
-                                    </Typography>
-                            </Stack>
-                    </Typography>
+                                            {!matchedParts && <Highlight word={props.example} />}
+                                            {/* {props.element.example} */}
+                                        </Stack>
+                                        
+                                        
+                                        </Typography>
+                                </Stack>
+                        </Typography>
+                        </Stack>
                     <Stack spacing={1} direction={"row"}>
-                        {!props.focused && workspace.element_to_label[props.elementId] && workspace.element_to_label[props.elementId].map(label=><Chip key={`${props.elementId}_${label}_light`} label={""} color={'primary'} sx={{backgroundColor:workspace.color_code[label], width:20, height:20}} size="small" />)}
+                            {!props.focused && workspace.element_to_label[props.elementId] && workspace.element_to_label[props.elementId].map(label=><Chip key={`${props.elementId}_${label}_light`} label={label} color={'primary'} sx={{ backgroundColor:lighten(workspace.color_code[label], 0.5), ...workspace.selectedTheme==label &&{backgroundColor:workspace.color_code[label]}, height:20}} size="small" />)}
                     </Stack>
+                    
 
                 </Stack>
                     
@@ -316,7 +325,7 @@ export default function AccordionSentence(props) {
 
                     
 
-                    {!loading && workspace.relatedExamples.map(element=><SentenceLight show={true} highlight={workspace.relatedExplanation[element.id]} element={element} handleBatchLabel={handleBatchLabel} sentence={element.example} key={`lightsent_${element.id}`}/>)}
+                    {!loading && workspace.relatedExamples.map(element=><SentenceLight color={lighten(workspace.color_code[workspace.selectedTheme], 0.5)} show={true} highlight={workspace.relatedExplanation[element.id]} element={element} handleBatchLabel={handleBatchLabel} sentence={element.example} key={`lightsent_${element.id}`}/>)}
 
 
                 </Stack>}

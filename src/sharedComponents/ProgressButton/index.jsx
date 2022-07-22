@@ -14,20 +14,39 @@ const useStyles = makeStyles(theme => ({
     },
     progress:{
         height:"50px"
-    }
+    },
+    colorPrimary: {
+      backgroundColor: "green" //props => props.color,
+    },
+
+    barColorPrimary: {
+      backgroundColor: 'red',
+    },
+    bar: props => ({
+      borderRadius: 8,
+      backgroundColor: props.color
+     })
+
   }))
 
   
 export default function ProgressButton(props) {
+  const [progressColor, setProgressColor] = React.useState({ color: 'red' })
 
     const classes = useStyles()
+
+
+
 
     return (
       <div className={classes.root}>
         <Button onClick={()=>props.retrain()} size={"small"} className={classes.button}>
           <div>
             Retrain
-            <LinearProgress sx={{minHeight:"20px"}}  variant="determinate" value={props.value} />
+            <LinearProgress classes={{
+                        colorPrimary: classes.colorPrimary,
+                        bar: classes.bar
+                      }} sx={{minHeight:"20px"}}  variant="determinate" value={props.value} />
           </div>
         </Button>
       </div>

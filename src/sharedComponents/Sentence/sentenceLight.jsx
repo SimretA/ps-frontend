@@ -49,7 +49,7 @@ export default function SentenceLight(props) {
     },[])
 
     const Highlight = ({ children, highlightIndex }) => (
-        <span className="highlight" >{children}</span>
+        <span className="highlight" style={{backgroundColor:props.color}} >{children}</span>
       );
     
     return(<>

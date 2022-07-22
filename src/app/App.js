@@ -8,7 +8,7 @@ import modules from '../routes';
 import { MuiThemeProvider } from '@material-ui/core';
 import { createTheme } from '@material-ui/core';
 import { CssBaseline } from '@mui/material';
-
+import { AuthProvider } from '../features/Auth/authcntxt';
 // import { Provider } from 'react-redux';
 
 function App() {
@@ -42,18 +42,21 @@ function App() {
  });
 
  const [darkmode, setDarkMode] = useState(true)
+ const [authed, setAuthed] = React.useState(false);
 
   return (
-    <div className="App">
-      <MuiThemeProvider theme={THEME}>
-        <CssBaseline/>
-        <Routes>
-          {modules.map(module => (
-            <Route {...module.routeProps} key={module.name} />
-          ))}
-        </Routes>
-      </MuiThemeProvider>
-    </div>
+    <AuthProvider>
+      <div className="App">
+        <MuiThemeProvider theme={THEME}>
+          <CssBaseline/>
+          <Routes>
+            {modules.map(module => (
+              <Route {...module.routeProps} key={module.name} />
+            ))}
+          </Routes>
+        </MuiThemeProvider>
+      </div>
+    </AuthProvider>
   );
 }
 
